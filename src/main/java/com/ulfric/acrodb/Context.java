@@ -26,6 +26,11 @@ public final class Context {
 			}
 			return new Context(jsonProducer);
 		}
+
+		public Builder setJsonProducer(JsonProducer<?> jsonProducer) {
+			this.jsonProducer = jsonProducer;
+			return this;
+		}
 	}
 
 	private final JsonProducer<?> jsonProducer;
