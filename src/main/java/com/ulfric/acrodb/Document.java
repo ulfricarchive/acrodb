@@ -124,6 +124,8 @@ public final class Document implements ReadWriteLocked, Saveable {
 			} catch (IOException exception) {
 				throw new UncheckedIOException(exception);
 			}
+
+			changed = false;
 		});
 	}
 
