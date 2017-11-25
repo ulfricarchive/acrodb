@@ -1,5 +1,5 @@
 # acrodb
-Embeddable document database for Java
+Embeddable flat-file document database for Java
 
 ## example
 ```
