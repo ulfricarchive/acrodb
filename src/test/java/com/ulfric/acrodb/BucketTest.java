@@ -145,4 +145,23 @@ class BucketTest extends JimfsTestBase {
 		Truth.assertThat(Files.notExists(path.resolve("hello.json"))).isTrue();
 	}
 
+	@JimfsTest
+	void testLoadAllDocumentsFindsUnloaded(FileSystem jimfs) throws IOException {
+		Path path = jimfs.getPath("acrodb");
+		Path documentPath = path.resolve("hello.json");
+
+		SampleBean sampleBean = new SampleBean();
+		sampleBean.someField = "some data";
+		Files.createDirectory(path);
+		Files.write(documentPath, new Gson().toJson(sampleBean).getBytes());
+
+		Document document = new Bucket(path).loadAllDocuments().findAny().get();
+		sampleBean = document.read(SampleBean.class);
+		Truth.assertThat(sampleBean.someField).isEqualTo("some data");
+	}
+
+	static class SampleBean {
+		String someField;
+	}
+
 }

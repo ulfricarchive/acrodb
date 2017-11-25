@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public final class Bucket implements BucketStore, DocumentStore, Saveable {
 
@@ -105,6 +106,17 @@ public final class Bucket implements BucketStore, DocumentStore, Saveable {
 	public void save() {
 		documents.values().forEach(Document::save);
 		childBuckets.values().forEach(Bucket::save);
+	}
+
+	@Override
+	public Stream<Document> loadAllDocuments() {
+		try {
+			return Files.list(path)
+					.filter(Files::isRegularFile)
+					.map(this::openDocument);
+		} catch (IOException exception) {
+			throw new UncheckedIOException(exception);
+		}
 	}
 
 }
