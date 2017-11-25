@@ -15,15 +15,15 @@ import com.google.gson.Gson;
 class DocumentTest extends JimfsTestBase {
 
 	@Test
-	void testNewNull() {
-		Assertions.assertThrows(NullPointerException.class, () -> new Document(null));
+	void testNewBothNull() {
+		Assertions.assertThrows(NullPointerException.class, () -> new Document(null, null));
 	}
 
 	@JimfsTest
 	void testNewAlreadyExistingRegularFile(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
 		Files.createFile(path);
-		new Document(path);
+		newDocument(path);
 		Truth.assertThat(Files.isRegularFile(path));
 	}
 
@@ -31,12 +31,12 @@ class DocumentTest extends JimfsTestBase {
 	void testNewAlreadyExistingNotRegularFile(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
 		Files.createDirectory(path);
-		Assertions.assertThrows(DocumentCreateException.class, () -> new Document(path));
+		Assertions.assertThrows(DocumentCreateException.class, () -> newDocument(path));
 	}
 
 	@JimfsTest
 	void testEdit(FileSystem jimfs) {
-		Document document = new Document(jimfs.getPath("some-document"));
+		Document document = newDocument(jimfs.getPath("some-document"));
 
 		String message = "hello world";
 		document.edit(SomeBean.class, someBean -> someBean.message = message);
@@ -58,7 +58,7 @@ class DocumentTest extends JimfsTestBase {
 
 		Files.write(path, new Gson().toJson(dataMock).getBytes());
 
-		Document document = new Document(path);
+		Document document = newDocument(path);
 
 		SomeBean[] instance = { null };
 		document.edit(SomeBean.class, someBean -> instance[0] = someBean);
@@ -68,7 +68,7 @@ class DocumentTest extends JimfsTestBase {
 
 	@JimfsTest
 	void testReadEmpty(FileSystem jimfs) {
-		Document document = new Document(jimfs.getPath("some-document"));
+		Document document = newDocument(jimfs.getPath("some-document"));
 
 		SomeBean instance = document.read(SomeBean.class);
 
@@ -77,7 +77,7 @@ class DocumentTest extends JimfsTestBase {
 
 	@JimfsTest
 	void testEditThenRead(FileSystem jimfs) {
-		Document document = new Document(jimfs.getPath("some-document"));
+		Document document = newDocument(jimfs.getPath("some-document"));
 
 		String message = "hello world";
 		document.edit(SomeBean.class, someBean -> someBean.message = message);
@@ -89,7 +89,7 @@ class DocumentTest extends JimfsTestBase {
 
 	@JimfsTest
 	void testWriteThenRead(FileSystem jimfs) {
-		Document document = new Document(jimfs.getPath("some-document"));
+		Document document = newDocument(jimfs.getPath("some-document"));
 
 		String message = "hello world";
 		SomeBean someBean = new SomeBean();
@@ -104,7 +104,7 @@ class DocumentTest extends JimfsTestBase {
 	@JimfsTest
 	void testEditWithMissingFileForCodeCoverage(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
-		Document document = new Document(path);
+		Document document = newDocument(path);
 		Files.delete(path);
 
 		Assertions.assertThrows(UncheckedIOException.class, () -> document.edit(SomeBean.class, ignore -> { }));
@@ -121,7 +121,7 @@ class DocumentTest extends JimfsTestBase {
 
 		Files.write(path, new Gson().toJson(dataMock).getBytes());
 
-		Document document = new Document(path);
+		Document document = newDocument(path);
 
 		SomeBean instance = document.read(SomeBean.class);
 
@@ -131,7 +131,7 @@ class DocumentTest extends JimfsTestBase {
 	@JimfsTest
 	void testReadWithMissingFileForCodeCoverage(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
-		Document document = new Document(path);
+		Document document = newDocument(path);
 		Files.delete(path);
 
 		Assertions.assertThrows(UncheckedIOException.class, () -> document.read(SomeBean.class));
@@ -140,7 +140,7 @@ class DocumentTest extends JimfsTestBase {
 	@JimfsTest
 	void testSaveWithNoData(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
-		Document document = new Document(path);
+		Document document = newDocument(path);
 		document.save();
 
 		Truth.assertThat(Files.readAllBytes(path)).isEmpty();
@@ -149,7 +149,7 @@ class DocumentTest extends JimfsTestBase {
 	@JimfsTest
 	void testSaveWithData(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
-		Document document = new Document(path);
+		Document document = newDocument(path);
 
 		String message = "hello world";
 		SomeBean someBean = new SomeBean();
@@ -159,6 +159,10 @@ class DocumentTest extends JimfsTestBase {
 
 		someBean = new Gson().fromJson(new String(Files.readAllBytes(path)), SomeBean.class);
 		Truth.assertThat(someBean.message).isEqualTo(message);
+	}
+
+	private Document newDocument(Path path) {
+		return new Document(Context.defaultContext(), path);
 	}
 
 	static class SomeBean {

@@ -14,17 +14,29 @@ import java.util.stream.Stream;
 public final class Bucket implements BucketStore, DocumentStore, Saveable {
 
 	private static final Pattern VALID_NAME = Pattern.compile("[a-zA-Z0-9]+([a-zA-Z0-9-]+[a-zA-Z0-9]+)?");
+
+	private final Context context;
 	private final Path path;
 	private final ConcurrentMap<Path, Bucket> childBuckets = new ConcurrentHashMap<>(2);
 	private final ConcurrentMap<Path, Document> documents = new ConcurrentHashMap<>(2);
 
 	public Bucket() {
-		this(Paths.get("acrodb"));
+		this(Context.defaultContext());
+	}
+
+	public Bucket(Context context) {
+		this(context, Paths.get("acrodb"));
 	}
 
 	public Bucket(Path path) {
+		this(Context.defaultContext(), path);
+	}
+
+	public Bucket(Context context, Path path) {
+		Objects.requireNonNull(context, "context");
 		Objects.requireNonNull(path, "path");
 
+		this.context = context;
 		this.path = path;
 		setupBucket();
 	}
@@ -49,7 +61,7 @@ public final class Bucket implements BucketStore, DocumentStore, Saveable {
 	public Bucket openBucket(String name) {
 		validateBucketName(name);
 
-		return childBuckets.computeIfAbsent(path.resolve(name), Bucket::new);
+		return childBuckets.computeIfAbsent(path.resolve(name), path -> new Bucket(context, path));
 	}
 
 	@Override
@@ -79,7 +91,7 @@ public final class Bucket implements BucketStore, DocumentStore, Saveable {
 	}
 
 	private Document openDocument(Path path) {
-		return documents.computeIfAbsent(path, Document::new);
+		return documents.computeIfAbsent(path, ignore -> new Document(context, path));
 	}
 
 	private void validateBucketName(String name) {

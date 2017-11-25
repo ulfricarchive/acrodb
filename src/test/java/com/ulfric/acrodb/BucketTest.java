@@ -17,8 +17,13 @@ import com.google.gson.JsonSyntaxException;
 class BucketTest extends JimfsTestBase {
 
 	@Test
-	void testNewNull() {
-		Assertions.assertThrows(NullPointerException.class, () -> new Bucket(null));
+	void testNewNullPath() {
+		Assertions.assertThrows(NullPointerException.class, () -> new Bucket((Path) null));
+	}
+
+	@Test
+	void testNewNullContext() {
+		Assertions.assertThrows(NullPointerException.class, () -> new Bucket((Context) null));
 	}
 
 	@JimfsTest
@@ -143,6 +148,13 @@ class BucketTest extends JimfsTestBase {
 		document.save();
 
 		Truth.assertThat(Files.notExists(path.resolve("hello.json"))).isTrue();
+	}
+
+	@JimfsTest
+	void testDeleteDocumentWhenNotPresentDoesNothing(FileSystem jimfs) {
+		Path path = jimfs.getPath("acrodb");
+		Bucket bucket = new Bucket(path);
+		bucket.deleteDocument("some-bucket");
 	}
 
 	@JimfsTest

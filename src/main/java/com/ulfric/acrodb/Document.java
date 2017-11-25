@@ -11,22 +11,21 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.ulfric.acrodb.json.JsonProducer;
 
 public final class Document implements ReadWriteLocked, Saveable {
 
-	private static final Gson GSON = new Gson();
-
+	private final Context context;
 	private final Path path;
 	private final ReadWriteLock lock = new ReentrantReadWriteLock();
-	private volatile JsonElement json;
+	private volatile Object json;
 	private volatile boolean changed;
 
-	Document(Path path) {
+	Document(Context context, Path path) {
+		Objects.requireNonNull(context, "context");
 		Objects.requireNonNull(path, "path");
 
+		this.context = context;
 		this.path = path;
 		setupDocument();
 	}
@@ -71,14 +70,14 @@ public final class Document implements ReadWriteLocked, Saveable {
 		writeLocked(() -> {
 			T value = readUnsafe(type);
 			consumer.accept(value);
-			json = GSON.toJsonTree(value, type);
+			json = context.getJsonProducer().toJson(value, type);
 			setChanged();
 		});
 	}
 
 	public void write(Object value) {
 		writeLocked(() -> {
-			json = GSON.toJsonTree(value);
+			json = context.getJsonProducer().toJson(value, value.getClass());
 			setChanged();
 		});
 	}
@@ -94,18 +93,20 @@ public final class Document implements ReadWriteLocked, Saveable {
 			json = readJsonFromPath();
 		}
 
-		return GSON.fromJson(json, type);
+		@SuppressWarnings("unchecked")
+		JsonProducer<Object> producer = (JsonProducer<Object>) context.getJsonProducer();
+		return producer.fromJson(json, type);
 	}
 
-	private JsonElement readJsonFromPath() {
-		JsonElement json;
+	private Object readJsonFromPath() {
+		Object json;
 		try {
-			json = GSON.fromJson(Files.newBufferedReader(path), JsonElement.class);
+			json = context.getJsonProducer().readJson(Files.newBufferedReader(path));
 		} catch (IOException exception) {
 			throw new UncheckedIOException(exception);
 		}
 
-		return json == null ? new JsonObject() : json;
+		return json == null ? context.getJsonProducer().empty() : json;
 	}
 
 	private void setChanged() {
