@@ -84,7 +84,9 @@ public final class Document implements ReadWriteLocked, Saveable {
 	}
 
 	public <T> T read(Class<T> type) {
-		return readLocked(() -> readUnsafe(type));
+		return readLocked(() -> {
+			return readUnsafe(type);
+		});
 	}
 
 	private <T> T readUnsafe(Type type) {
@@ -122,6 +124,13 @@ public final class Document implements ReadWriteLocked, Saveable {
 			} catch (IOException exception) {
 				throw new UncheckedIOException(exception);
 			}
+		});
+	}
+
+	void invalidate() {
+		writeLocked(() -> {
+			json = null;
+			changed = false;
 		});
 	}
 

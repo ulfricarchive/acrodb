@@ -1,6 +1,7 @@
 package com.ulfric.acrodb;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,7 +15,7 @@ public final class Bucket implements BucketStore, DocumentStore, Saveable {
 	private static final Pattern VALID_NAME = Pattern.compile("[a-zA-Z0-9]+([a-zA-Z0-9-]+[a-zA-Z0-9]+)?");
 	private final Path path;
 	private final ConcurrentMap<Path, Bucket> childBuckets = new ConcurrentHashMap<>(2);
-	private final ConcurrentMap<Path, Document> childDocuments = new ConcurrentHashMap<>(2);
+	private final ConcurrentMap<Path, Document> documents = new ConcurrentHashMap<>(2);
 
 	public Bucket() {
 		this(Paths.get("acrodb"));
@@ -57,8 +58,27 @@ public final class Bucket implements BucketStore, DocumentStore, Saveable {
 		return openDocument(path.resolve(name + ".json"));
 	}
 
+	@Override
+	public void deleteDocument(String name) {
+		validateDocumentName(name);
+
+		documents.compute(path.resolve(name + ".json"), (path, document) -> {
+			if (document != null) {
+				document.invalidate();
+			}
+
+			try {
+				Files.deleteIfExists(path);
+			} catch (IOException exception) {
+				throw new UncheckedIOException(exception);
+			}
+
+			return document;
+		});
+	}
+
 	private Document openDocument(Path path) {
-		return childDocuments.computeIfAbsent(path, Document::new);
+		return documents.computeIfAbsent(path, Document::new);
 	}
 
 	private void validateBucketName(String name) {
@@ -83,7 +103,7 @@ public final class Bucket implements BucketStore, DocumentStore, Saveable {
 
 	@Override
 	public void save() {
-		childDocuments.values().forEach(Document::save);
+		documents.values().forEach(Document::save);
 		childBuckets.values().forEach(Bucket::save);
 	}
 

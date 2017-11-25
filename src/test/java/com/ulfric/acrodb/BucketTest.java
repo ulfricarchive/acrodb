@@ -117,4 +117,32 @@ class BucketTest extends JimfsTestBase {
 		Truth.assertThat(json.get("message").getAsString()).isEqualTo(message);
 	}
 
+	@JimfsTest
+	void testDeleteDocumentRemovesFile(FileSystem jimfs) throws JsonSyntaxException, JsonIOException {
+		Path path = jimfs.getPath("acrodb");
+		Bucket bucket = new Bucket(path);
+		Document document = bucket.openDocument("hello");
+
+		document.write(new JsonObject());
+
+		bucket.save();
+		Truth.assertThat(Files.exists(path.resolve("hello.json"))).isTrue();
+
+		bucket.deleteDocument("hello");
+		Truth.assertThat(Files.notExists(path.resolve("hello.json"))).isTrue();
+	}
+
+	@JimfsTest
+	void testSaveOnDeletedDocumentDoesNothing(FileSystem jimfs) throws JsonSyntaxException, JsonIOException {
+		Path path = jimfs.getPath("acrodb");
+		Bucket bucket = new Bucket(path);
+		Document document = bucket.openDocument("hello");
+
+		document.write(new JsonObject());
+		bucket.deleteDocument("hello");
+		document.save();
+
+		Truth.assertThat(Files.notExists(path.resolve("hello.json"))).isTrue();
+	}
+
 }
