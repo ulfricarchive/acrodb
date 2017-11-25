@@ -54,7 +54,11 @@ public final class Bucket implements BucketStore, DocumentStore, Saveable {
 	public Document openDocument(String name) {
 		validateDocumentName(name);
 
-		return childDocuments.computeIfAbsent(path.resolve(name + ".json"), Document::new);
+		return openDocument(path.resolve(name + ".json"));
+	}
+
+	private Document openDocument(Path path) {
+		return childDocuments.computeIfAbsent(path, Document::new);
 	}
 
 	private void validateBucketName(String name) {
