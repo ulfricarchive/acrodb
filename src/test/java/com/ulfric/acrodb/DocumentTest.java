@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import com.google.common.truth.Truth;
 import com.google.gson.Gson;
 
-class DocumentTest extends JimfsTestBase {
+class DocumentTest implements JimfsTestBase {
 
 	@Test
 	void testNewBothNull() {

@@ -14,7 +14,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
-class BucketTest extends JimfsTestBase {
+class BucketTest implements JimfsTestBase {
 
 	@Test
 	void testNewNullPath() {

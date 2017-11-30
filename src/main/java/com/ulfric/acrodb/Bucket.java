@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public final class Bucket implements BucketStore, DocumentStore, Saveable {
+public final class Bucket extends ConcurrentSaveable implements BucketStore, DocumentStore {
 
 	private static final Pattern VALID_NAME = Pattern.compile("[a-zA-Z0-9]+([a-zA-Z0-9-]+[a-zA-Z0-9]+)?");
 
@@ -115,7 +115,9 @@ public final class Bucket implements BucketStore, DocumentStore, Saveable {
 	}
 
 	@Override
-	public void save() {
+	protected void onConcurrentSave() {
+		super.onConcurrentSave();
+
 		documents.values().forEach(Document::save);
 		childBuckets.values().forEach(Bucket::save);
 	}

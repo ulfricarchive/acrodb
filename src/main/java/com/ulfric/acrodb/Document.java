@@ -7,17 +7,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
 import com.ulfric.acrodb.json.JsonProducer;
 
-public final class Document implements ReadWriteLocked, Saveable {
+public final class Document extends ConcurrentSaveable {
 
 	private final Context context;
 	private final Path path;
-	private final ReadWriteLock lock = new ReentrantReadWriteLock();
 	private volatile Object json;
 	private volatile boolean changed;
 
@@ -46,26 +43,6 @@ public final class Document implements ReadWriteLocked, Saveable {
 		}
 	}
 
-	@Override
-	public void lockRead() {
-		lock.readLock().lock();
-	}
-
-	@Override
-	public void lockWrite() {
-		lock.writeLock().lock();
-	}
-
-	@Override
-	public void unlockRead() {
-		lock.readLock().unlock();
-	}
-
-	@Override
-	public void unlockWrite() {
-		lock.writeLock().unlock();
-	}
-
 	public <T> void edit(Class<T> type, Consumer<T> consumer) {
 		writeLocked(() -> {
 			T value = readUnsafe(type);
@@ -77,12 +54,18 @@ public final class Document implements ReadWriteLocked, Saveable {
 
 	public void write(Object value) {
 		writeLocked(() -> {
-			json = context.getJsonProducer().toJson(value, value.getClass());
+			json = context.getJsonProducer().toJson(value, value == null ? Object.class : value.getClass());
 			setChanged();
 		});
 	}
 
 	public <T> T read(Class<T> type) {
+		return readLocked(() -> {
+			return readUnsafe(type);
+		});
+	}
+
+	public <T> T read(Type type) {
 		return readLocked(() -> {
 			return readUnsafe(type);
 		});
@@ -114,20 +97,20 @@ public final class Document implements ReadWriteLocked, Saveable {
 	}
 
 	@Override
-	public void save() {
-		writeLocked(() -> {
-			if (!changed) {
-				return;
-			}
+	protected void onConcurrentSave() {
+		super.onConcurrentSave();
 
-			try {
-				Files.write(path, json.toString().getBytes(StandardCharsets.UTF_8));
-			} catch (IOException exception) {
-				throw new UncheckedIOException(exception);
-			}
+		if (!changed) {
+			return;
+		}
 
-			changed = false;
-		});
+		try {
+			Files.write(path, json.toString().getBytes(StandardCharsets.UTF_8));
+		} catch (IOException exception) {
+			throw new UncheckedIOException(exception);
+		}
+
+		changed = false;
 	}
 
 	void invalidate() {
