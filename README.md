@@ -3,7 +3,7 @@ Embeddable flat-file document database for Java
 
 ## example
 ```
-Bucket bucket = new Bucket(); // you can pass a Path object to specify where the bucket will be. By default, it's at acrodb/
+Bucket bucket = new Bucket(); // you can pass a Path object to specify where the bucket will be. By default, it's at ./acrodb/
 Document document = bucket.openDocument("some-document"); // you can also open another bucket instead of a document
 
 SomeBean someBean = new SomeBean();
