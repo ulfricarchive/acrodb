@@ -149,6 +149,13 @@
 			<version>2.12.0</version>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.ulfric.allsystemsgo</groupId>
+			<artifactId>all-systems-go</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 </project>

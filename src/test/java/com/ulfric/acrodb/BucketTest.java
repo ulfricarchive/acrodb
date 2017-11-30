@@ -13,8 +13,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.ulfric.allsystemsgo.AllSystemsContract;
+import com.ulfric.allsystemsgo.AllSystemsTest;
 
-class BucketTest implements JimfsTestBase {
+class BucketTest implements AllSystemsContract {
 
 	@Test
 	void testNewNullPath() {
@@ -26,21 +28,21 @@ class BucketTest implements JimfsTestBase {
 		Assertions.assertThrows(NullPointerException.class, () -> new Bucket((Context) null));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testNewCreatesDirectory(FileSystem jimfs) {
 		Path path = jimfs.getPath("acrodb");
 		new Bucket(path);
 		Truth.assertThat(Files.isDirectory(path)).isTrue();
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testFailsWhenDirectoryIsExistingNonDirectory(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("acrodb");
 		Files.createFile(path);
 		Assertions.assertThrows(BucketCreateException.class, () -> new Bucket(path));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testFailsWhenDirectoryIsExistingDirectory(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("acrodb");
 		Files.createDirectory(path);
@@ -48,63 +50,63 @@ class BucketTest implements JimfsTestBase {
 		Truth.assertThat(Files.isDirectory(path)).isTrue();
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testOpenBucketNull(FileSystem jimfs) {
 		Path path = jimfs.getPath("acrodb");
 		Bucket bucket = new Bucket(path);
 		Assertions.assertThrows(NullPointerException.class, () -> bucket.openBucket(null));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testOpenBucketEmpty(FileSystem jimfs) {
 		Path path = jimfs.getPath("acrodb");
 		Bucket bucket = new Bucket(path);
 		Assertions.assertThrows(IllegalArgumentException.class, () -> bucket.openBucket(""));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testOpenBucketIllegalPath(FileSystem jimfs) {
 		Path path = jimfs.getPath("acrodb");
 		Bucket bucket = new Bucket(path);
 		Assertions.assertThrows(IllegalArgumentException.class, () -> bucket.openBucket("hello!"));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testOpenBucketValidPath(FileSystem jimfs) {
 		Path path = jimfs.getPath("acrodb");
 		new Bucket(path).openBucket("hello");
 		Truth.assertThat(Files.isDirectory(path.resolve("hello"))).isTrue();
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testOpenDocumentNull(FileSystem jimfs) {
 		Path path = jimfs.getPath("acrodb");
 		Bucket bucket = new Bucket(path);
 		Assertions.assertThrows(NullPointerException.class, () -> bucket.openDocument(null));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testOpenDocumentEmpty(FileSystem jimfs) {
 		Path path = jimfs.getPath("acrodb");
 		Bucket bucket = new Bucket(path);
 		Assertions.assertThrows(IllegalArgumentException.class, () -> bucket.openDocument(""));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testOpenDocumentIllegalPath(FileSystem jimfs) {
 		Path path = jimfs.getPath("acrodb");
 		Bucket bucket = new Bucket(path);
 		Assertions.assertThrows(IllegalArgumentException.class, () -> bucket.openDocument("hello!"));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testOpenDocumentValidPath(FileSystem jimfs) {
 		Path path = jimfs.getPath("acrodb");
 		new Bucket(path).openDocument("hello");
 		Truth.assertThat(Files.isRegularFile(path.resolve("hello.json"))).isTrue();
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testSavesChildren(FileSystem jimfs) throws JsonSyntaxException, JsonIOException, IOException {
 		Path path = jimfs.getPath("acrodb");
 		Bucket bucket = new Bucket(path);
@@ -122,7 +124,7 @@ class BucketTest implements JimfsTestBase {
 		Truth.assertThat(json.get("message").getAsString()).isEqualTo(message);
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testDeleteDocumentRemovesFile(FileSystem jimfs) throws JsonSyntaxException, JsonIOException {
 		Path path = jimfs.getPath("acrodb");
 		Bucket bucket = new Bucket(path);
@@ -137,7 +139,7 @@ class BucketTest implements JimfsTestBase {
 		Truth.assertThat(Files.notExists(path.resolve("hello.json"))).isTrue();
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testSaveOnDeletedDocumentDoesNothing(FileSystem jimfs) throws JsonSyntaxException, JsonIOException {
 		Path path = jimfs.getPath("acrodb");
 		Bucket bucket = new Bucket(path);
@@ -150,14 +152,14 @@ class BucketTest implements JimfsTestBase {
 		Truth.assertThat(Files.notExists(path.resolve("hello.json"))).isTrue();
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testDeleteDocumentWhenNotPresentDoesNothing(FileSystem jimfs) {
 		Path path = jimfs.getPath("acrodb");
 		Bucket bucket = new Bucket(path);
 		bucket.deleteDocument("some-bucket");
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testLoadAllDocumentsFindsUnloaded(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("acrodb");
 		Path documentPath = path.resolve("hello.json");

@@ -11,15 +11,17 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.truth.Truth;
 import com.google.gson.Gson;
+import com.ulfric.allsystemsgo.AllSystemsContract;
+import com.ulfric.allsystemsgo.AllSystemsTest;
 
-class DocumentTest implements JimfsTestBase {
+class DocumentTest implements AllSystemsContract {
 
 	@Test
 	void testNewBothNull() {
 		Assertions.assertThrows(NullPointerException.class, () -> new Document(null, null));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testNewAlreadyExistingRegularFile(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
 		Files.createFile(path);
@@ -27,14 +29,14 @@ class DocumentTest implements JimfsTestBase {
 		Truth.assertThat(Files.isRegularFile(path));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testNewAlreadyExistingNotRegularFile(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
 		Files.createDirectory(path);
 		Assertions.assertThrows(DocumentCreateException.class, () -> newDocument(path));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testEdit(FileSystem jimfs) {
 		Document document = newDocument(jimfs.getPath("some-document"));
 
@@ -47,7 +49,7 @@ class DocumentTest implements JimfsTestBase {
 		Truth.assertThat(instance[0].message).isEqualTo(message);
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testEditWithExistingData(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
 
@@ -66,7 +68,7 @@ class DocumentTest implements JimfsTestBase {
 		Truth.assertThat(instance[0].message).isEqualTo(message);
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testReadEmpty(FileSystem jimfs) {
 		Document document = newDocument(jimfs.getPath("some-document"));
 
@@ -75,7 +77,7 @@ class DocumentTest implements JimfsTestBase {
 		Truth.assertThat(instance.message).isNull();
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testEditThenRead(FileSystem jimfs) {
 		Document document = newDocument(jimfs.getPath("some-document"));
 
@@ -87,7 +89,7 @@ class DocumentTest implements JimfsTestBase {
 		Truth.assertThat(instance.message).isEqualTo(message);
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testWriteThenRead(FileSystem jimfs) {
 		Document document = newDocument(jimfs.getPath("some-document"));
 
@@ -101,7 +103,7 @@ class DocumentTest implements JimfsTestBase {
 		Truth.assertThat(instance.message).isEqualTo(message);
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testEditWithMissingFileForCodeCoverage(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
 		Document document = newDocument(path);
@@ -110,7 +112,7 @@ class DocumentTest implements JimfsTestBase {
 		Assertions.assertThrows(UncheckedIOException.class, () -> document.edit(SomeBean.class, ignore -> { }));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testReadWithExistingData(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
 
@@ -128,7 +130,7 @@ class DocumentTest implements JimfsTestBase {
 		Truth.assertThat(instance.message).isEqualTo(message);
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testReadWithMissingFileForCodeCoverage(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
 		Document document = newDocument(path);
@@ -137,7 +139,7 @@ class DocumentTest implements JimfsTestBase {
 		Assertions.assertThrows(UncheckedIOException.class, () -> document.read(SomeBean.class));
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testSaveWithNoData(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
 		Document document = newDocument(path);
@@ -146,7 +148,7 @@ class DocumentTest implements JimfsTestBase {
 		Truth.assertThat(Files.readAllBytes(path)).isEmpty();
 	}
 
-	@JimfsTest
+	@AllSystemsTest
 	void testSaveWithData(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
 		Document document = newDocument(path);
