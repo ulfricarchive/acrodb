@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import com.ulfric.acrodb.json.JsonProducer;
 
@@ -43,12 +44,22 @@ public final class Document extends ConcurrentSaveable {
 		}
 	}
 
-	public <T> void edit(Class<T> type, Consumer<T> consumer) {
-		writeLocked(() -> {
-			T value = readUnsafe(type);
+	public <T> void editAndWrite(Class<T> type, Consumer<T> consumer) {
+		editAndWriteIf(type, value -> {
 			consumer.accept(value);
-			json = context.getJsonProducer().toJson(value, type);
-			setChanged();
+			return true;
+		});
+	}
+
+	public <T> boolean editAndWriteIf(Class<T> type, Predicate<T> consumer) {
+		return writeLocked(() -> {
+			T value = readUnsafe(type);
+			if (consumer.test(value)) {
+				json = context.getJsonProducer().toJson(value, type);
+				setChanged();
+				return true;
+			}
+			return false;
 		});
 	}
 
@@ -56,6 +67,7 @@ public final class Document extends ConcurrentSaveable {
 		writeLocked(() -> {
 			json = context.getJsonProducer().toJson(value, value == null ? Object.class : value.getClass());
 			setChanged();
+			return null;
 		});
 	}
 
@@ -117,6 +129,7 @@ public final class Document extends ConcurrentSaveable {
 		writeLocked(() -> {
 			json = null;
 			changed = false;
+			return null;
 		});
 	}
 

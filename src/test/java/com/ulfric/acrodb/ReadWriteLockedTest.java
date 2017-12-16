@@ -24,12 +24,11 @@ class ReadWriteLockedTest {
 	void testWriteLockedDoesLock() {
 		ReadWriteLocked mock = Mockito.mock(ReadWriteLocked.class);
 		Mockito.doCallRealMethod().when(mock).writeLocked(ArgumentMatchers.any());
-		boolean[] locked = { false };
-		mock.writeLocked(() -> {
+		Boolean called = mock.writeLocked(() -> {
 			Mockito.verify(mock, Mockito.times(1)).lockWrite();
-			locked[0] = true;
+			return true;
 		});
-		Truth.assertThat(locked[0]).isTrue();
+		Truth.assertThat(called).isTrue();
 		Mockito.verify(mock, Mockito.times(1)).unlockWrite();
 	}
 

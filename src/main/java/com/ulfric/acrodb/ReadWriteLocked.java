@@ -21,10 +21,10 @@ public interface ReadWriteLocked {
 		}
 	}
 
-	default void writeLocked(Runnable runnable) {
+	default <T> T writeLocked(Supplier<T> supplier) {
 		lockWrite();
 		try {
-			runnable.run();
+			return supplier.get();
 		} finally {
 			unlockWrite();
 		}

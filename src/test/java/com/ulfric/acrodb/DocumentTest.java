@@ -2,6 +2,7 @@ package com.ulfric.acrodb;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Type;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,10 +42,10 @@ class DocumentTest implements AllSystemsContract {
 		Document document = newDocument(jimfs.getPath("some-document"));
 
 		String message = "hello world";
-		document.edit(SomeBean.class, someBean -> someBean.message = message);
+		document.editAndWrite(SomeBean.class, someBean -> someBean.message = message);
 
 		SomeBean[] instance = { null };
-		document.edit(SomeBean.class, someBean -> instance[0] = someBean);
+		document.editAndWrite(SomeBean.class, someBean -> instance[0] = someBean);
 
 		Truth.assertThat(instance[0].message).isEqualTo(message);
 	}
@@ -63,7 +64,7 @@ class DocumentTest implements AllSystemsContract {
 		Document document = newDocument(path);
 
 		SomeBean[] instance = { null };
-		document.edit(SomeBean.class, someBean -> instance[0] = someBean);
+		document.editAndWrite(SomeBean.class, someBean -> instance[0] = someBean);
 
 		Truth.assertThat(instance[0].message).isEqualTo(message);
 	}
@@ -82,7 +83,7 @@ class DocumentTest implements AllSystemsContract {
 		Document document = newDocument(jimfs.getPath("some-document"));
 
 		String message = "hello world";
-		document.edit(SomeBean.class, someBean -> someBean.message = message);
+		document.editAndWrite(SomeBean.class, someBean -> someBean.message = message);
 
 		SomeBean instance = document.read(SomeBean.class);
 
@@ -104,12 +105,27 @@ class DocumentTest implements AllSystemsContract {
 	}
 
 	@AllSystemsTest
+	void testWriteThenReadGeneric(FileSystem jimfs) {
+		Document document = newDocument(jimfs.getPath("some-document"));
+
+		String message = "hello world";
+		SomeBean someBean = new SomeBean();
+		someBean.message = message;
+		document.write(someBean);
+
+		Type type = SomeBean.class;
+		SomeBean instance = document.read(type);
+
+		Truth.assertThat(instance.message).isEqualTo(message);
+	}
+
+	@AllSystemsTest
 	void testEditWithMissingFileForCodeCoverage(FileSystem jimfs) throws IOException {
 		Path path = jimfs.getPath("some-document");
 		Document document = newDocument(path);
 		Files.delete(path);
 
-		Assertions.assertThrows(UncheckedIOException.class, () -> document.edit(SomeBean.class, ignore -> { }));
+		Assertions.assertThrows(UncheckedIOException.class, () -> document.editAndWrite(SomeBean.class, ignore -> { }));
 	}
 
 	@AllSystemsTest

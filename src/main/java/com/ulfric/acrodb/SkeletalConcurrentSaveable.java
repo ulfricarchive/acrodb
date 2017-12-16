@@ -7,6 +7,7 @@ public abstract class SkeletalConcurrentSaveable extends SimpleSaveable implemen
 		writeLocked(() -> {
 			super.save();
 			onConcurrentSave();
+			return null;
 		});
 	}
 
@@ -14,6 +15,7 @@ public abstract class SkeletalConcurrentSaveable extends SimpleSaveable implemen
 	public final void onSave(Runnable runnable) {
 		writeLocked(() -> {
 			super.onSave(runnable);
+			return null;
 		});
 	}
 
