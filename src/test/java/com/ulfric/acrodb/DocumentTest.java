@@ -12,10 +12,9 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.truth.Truth;
 import com.google.gson.Gson;
-import com.ulfric.allsystemsgo.AllSystemsContract;
 import com.ulfric.allsystemsgo.AllSystemsTest;
 
-class DocumentTest implements AllSystemsContract {
+class DocumentTest {
 
 	@Test
 	void testNewBothNull() {
