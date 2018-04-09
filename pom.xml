@@ -34,7 +34,7 @@
 					<dependency>
 						<groupId>org.junit.platform</groupId>
 						<artifactId>junit-platform-surefire-provider</artifactId>
-						<version>1.0.2</version>
+						<version>1.1.1</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -42,7 +42,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.9</version>
+				<version>0.8.1</version>
 				<configuration>
 					<destFile>${basedir}/target/coverage/jacoco.exec</destFile>
 					<dataFile>${basedir}/target/coverage/jacoco.exec</dataFile>
@@ -104,14 +104,14 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.0.2</version>
+			<version>5.1.1</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
-			<version>5.0.2</version>
+			<version>5.1.1</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -125,28 +125,28 @@
 		<dependency>
 			<groupId>com.google.truth</groupId>
 			<artifactId>truth</artifactId>
-			<version>0.36</version>
+			<version>0.40</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.truth.extensions</groupId>
 			<artifactId>truth-java8-extension</artifactId>
-			<version>0.36</version>
+			<version>0.40</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>23.4-jre</version>
+			<version>24.1-jre</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>2.12.0</version>
+			<version>2.18.0</version>
 			<scope>test</scope>
 		</dependency>
 
