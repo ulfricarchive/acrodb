@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -24,15 +23,15 @@ public final class Bucket extends ConcurrentSaveable implements BucketStore, Doc
 		this(Context.defaultContext());
 	}
 
+	public Bucket(Path rootDirectory) {
+		this(Context.builder().setFileSystem(rootDirectory.getFileSystem()).setRootDirectory(rootDirectory.toString()).build());
+	}
+
 	public Bucket(Context context) {
-		this(context, Paths.get("acrodb"));
+		this(context, context.getFileSystem().getPath(context.getRootDirectory()));
 	}
 
-	public Bucket(Path path) {
-		this(Context.defaultContext(), path);
-	}
-
-	public Bucket(Context context, Path path) {
+	private Bucket(Context context, Path path) {
 		Objects.requireNonNull(context, "context");
 		Objects.requireNonNull(path, "path");
 
