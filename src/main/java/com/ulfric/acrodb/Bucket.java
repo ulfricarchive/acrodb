@@ -67,14 +67,14 @@ public final class Bucket extends ConcurrentSaveable implements BucketStore, Doc
 	public Document openDocument(String name) {
 		validateDocumentName(name);
 
-		return openDocument(path.resolve(name + ".json"));
+		return openDocument(path.resolve(name + fileExtension()));
 	}
 
 	@Override
 	public void deleteDocument(String name) {
 		validateDocumentName(name);
 
-		documents.compute(path.resolve(name + ".json"), (path, document) -> {
+		documents.compute(path.resolve(name + fileExtension()), (path, document) -> {
 			if (document != null) {
 				document.invalidate();
 			}
@@ -87,6 +87,10 @@ public final class Bucket extends ConcurrentSaveable implements BucketStore, Doc
 
 			return document;
 		});
+	}
+
+	private String fileExtension() {
+		return '.' + context.getPojoProducer().fileExtension();
 	}
 
 	private Document openDocument(Path path) {

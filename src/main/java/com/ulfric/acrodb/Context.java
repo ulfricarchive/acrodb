@@ -3,8 +3,8 @@ package com.ulfric.acrodb;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 
-import com.ulfric.acrodb.json.JsonProducer;
-import com.ulfric.acrodb.json.gson.GsonProducer;
+import com.ulfric.acrodb.serialization.PojoProducer;
+import com.ulfric.acrodb.serialization.json.gson.GsonPojoProducer;
 
 public final class Context {
 
@@ -17,7 +17,7 @@ public final class Context {
 	}
 
 	public static final class Builder {
-		private JsonProducer<?> jsonProducer;
+		private PojoProducer<?> pojoProducer;
 		private FileSystem fileSystem;
 		private String rootDirectory;
 
@@ -25,9 +25,9 @@ public final class Context {
 		}
 
 		public Context build() {
-			JsonProducer<?> jsonProducer = this.jsonProducer;
-			if (jsonProducer == null) {
-				jsonProducer = new GsonProducer();
+			PojoProducer<?> pojoProducer = this.pojoProducer;
+			if (pojoProducer == null) {
+				pojoProducer = new GsonPojoProducer();
 			}
 
 			FileSystem fileSystem = this.fileSystem;
@@ -40,11 +40,11 @@ public final class Context {
 				rootDirectory = "acrodb";
 			}
 
-			return new Context(jsonProducer, fileSystem, rootDirectory);
+			return new Context(pojoProducer, fileSystem, rootDirectory);
 		}
 
-		public Builder setJsonProducer(JsonProducer<?> jsonProducer) {
-			this.jsonProducer = jsonProducer;
+		public Builder setPojoProducer(PojoProducer<?> pojoProducer) {
+			this.pojoProducer = pojoProducer;
 			return this;
 		}
 
@@ -59,18 +59,18 @@ public final class Context {
 		}
 	}
 
-	private final JsonProducer<?> jsonProducer;
+	private final PojoProducer<?> pojoProducer;
 	private final FileSystem fileSystem;
 	private final String rootDirectory;
 
-	private Context(JsonProducer<?> jsonProducer, FileSystem fileSystem, String rootDirectory) {
-		this.jsonProducer = jsonProducer;
+	private Context(PojoProducer<?> pojoProducer, FileSystem fileSystem, String rootDirectory) {
+		this.pojoProducer = pojoProducer;
 		this.fileSystem = fileSystem;
 		this.rootDirectory = rootDirectory;
 	}
 
-	public JsonProducer<?> getJsonProducer() {
-		return jsonProducer;
+	public PojoProducer<?> getPojoProducer() {
+		return pojoProducer;
 	}
 
 	public FileSystem getFileSystem() {

@@ -3,27 +3,27 @@ package com.ulfric.acrodb;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.truth.Truth;
-import com.ulfric.acrodb.json.JsonProducer;
-import com.ulfric.acrodb.json.gson.GsonProducer;
+import com.ulfric.acrodb.serialization.PojoProducer;
+import com.ulfric.acrodb.serialization.json.gson.GsonPojoProducer;
 
 class ContextTest {
 
 	@Test
 	void testSetJsonProducerWorks() {
-		JsonProducer<?> producer = new GsonProducer();
-		JsonProducer<?> actualProducer = Context.builder()
-			.setJsonProducer(producer)
+		PojoProducer<?> producer = new GsonPojoProducer();
+		PojoProducer<?> actualProducer = Context.builder()
+			.setPojoProducer(producer)
 			.build()
-			.getJsonProducer();
+			.getPojoProducer();
 
 		Truth.assertThat(actualProducer).isSameAs(producer);
 	}
 
 	@Test
 	void testSetJsonProducerIsDefaulted() {
-		JsonProducer<?> actualProducer = Context.builder()
+		PojoProducer<?> actualProducer = Context.builder()
 			.build()
-			.getJsonProducer();
+			.getPojoProducer();
 
 		Truth.assertThat(actualProducer).isNotNull();
 	}

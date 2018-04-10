@@ -10,13 +10,13 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import com.ulfric.acrodb.json.JsonProducer;
+import com.ulfric.acrodb.serialization.PojoProducer;
 
 public final class Document extends ConcurrentSaveable {
 
 	private final Context context;
 	private final Path path;
-	private volatile Object json;
+	private volatile Object rawData;
 	private volatile boolean changed;
 
 	Document(Context context, Path path) {
@@ -55,7 +55,7 @@ public final class Document extends ConcurrentSaveable {
 		return writeLocked(() -> {
 			T value = readUnsafe(type);
 			if (consumer.test(value)) {
-				json = context.getJsonProducer().toJson(value, type);
+				rawData = context.getPojoProducer().toData(value, type);
 				setChanged();
 				return true;
 			}
@@ -65,7 +65,7 @@ public final class Document extends ConcurrentSaveable {
 
 	public void write(Object value) {
 		writeLocked(() -> {
-			json = context.getJsonProducer().toJson(value, value == null ? Object.class : value.getClass());
+			rawData = context.getPojoProducer().toData(value, value == null ? Object.class : value.getClass());
 			setChanged();
 			return null;
 		});
@@ -84,24 +84,24 @@ public final class Document extends ConcurrentSaveable {
 	}
 
 	private <T> T readUnsafe(Type type) {
-		if (json == null) {
-			json = readJsonFromPath();
+		if (rawData == null) {
+			rawData = readRawDataFromPath();
 		}
 
 		@SuppressWarnings("unchecked")
-		JsonProducer<Object> producer = (JsonProducer<Object>) context.getJsonProducer();
-		return producer.fromJson(json, type);
+		PojoProducer<Object> producer = (PojoProducer<Object>) context.getPojoProducer();
+		return producer.fromData(rawData, type);
 	}
 
-	private Object readJsonFromPath() {
-		Object json;
+	private Object readRawDataFromPath() {
+		Object rawData;
 		try {
-			json = context.getJsonProducer().readJson(Files.newBufferedReader(path));
+			rawData = context.getPojoProducer().readData(Files.newBufferedReader(path));
 		} catch (IOException exception) {
 			throw new UncheckedIOException(exception);
 		}
 
-		return json == null ? context.getJsonProducer().empty() : json;
+		return rawData == null ? context.getPojoProducer().emptyData() : rawData;
 	}
 
 	private void setChanged() {
@@ -117,7 +117,7 @@ public final class Document extends ConcurrentSaveable {
 		}
 
 		try {
-			Files.write(path, json.toString().getBytes(StandardCharsets.UTF_8));
+			Files.write(path, rawData.toString().getBytes(StandardCharsets.UTF_8));
 		} catch (IOException exception) {
 			throw new UncheckedIOException(exception);
 		}
@@ -127,7 +127,7 @@ public final class Document extends ConcurrentSaveable {
 
 	void invalidate() {
 		writeLocked(() -> {
-			json = null;
+			rawData = null;
 			changed = false;
 			return null;
 		});
