@@ -168,7 +168,7 @@ class BucketTest {
 		Files.createDirectory(path);
 		Files.write(documentPath, new Gson().toJson(sampleBean).getBytes());
 
-		Document document = new Bucket(path).loadAllDocuments().findAny().get();
+		Document document = new Bucket(path).openAllDocuments().findAny().get();
 		sampleBean = document.read(SampleBean.class);
 		Truth.assertThat(sampleBean.someField).isEqualTo("some data");
 	}

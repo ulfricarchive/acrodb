@@ -126,14 +126,16 @@ public final class Bucket extends ConcurrentSaveable implements BucketStore, Doc
 	}
 
 	@Override
-	public Stream<Document> loadAllDocuments() {
-		try {
-			return Files.list(path)
-					.filter(Files::isRegularFile)
-					.map(this::openDocument);
-		} catch (IOException exception) {
-			throw new UncheckedIOException(exception);
-		}
+	public Stream<Document> openAllDocuments() {
+		return readLocked(() -> {
+			try {
+				return Files.list(path)
+						.filter(Files::isRegularFile)
+						.map(this::openDocument);
+			} catch (IOException exception) {
+				throw new UncheckedIOException(exception);
+			}
+		});
 	}
 
 }

@@ -8,6 +8,6 @@ public interface DocumentStore {
 
 	void deleteDocument(String name);
 
-	Stream<Document> loadAllDocuments();
+	Stream<Document> openAllDocuments();
 
 }
