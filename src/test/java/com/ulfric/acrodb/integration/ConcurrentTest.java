@@ -12,17 +12,23 @@ import java.util.concurrent.Executors;
 public class ConcurrentTest {
 
     public static void main(String[] args) {
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        final long start = System.currentTimeMillis();
+        ExecutorService executorService = Executors.newFixedThreadPool(6);
 
         executorService.submit(new FileUpdaterJob());
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
+        executorService.submit(new FileUpdaterJob());
+        executorService.submit(new FileUpdaterJob());
+        executorService.submit(new FileUpdaterJob());
+        executorService.submit(new FileUpdaterJob());
         executorService.submit(new FileUpdaterJob());
         executorService.shutdown();
+
+         while (!executorService.isTerminated()) {
+
+         }
+
+        System.out.println("Test completed in " + Long.toString(System.currentTimeMillis() - start)+" miliseconds");
     }
 }
 
@@ -41,8 +47,10 @@ class FileUpdaterJob implements Runnable {
             try {
                 Thread.sleep(1000);
                 document.editAndWrite(ContentAppender.class, contentAppender -> {
-                    contentAppender.appendLine(lineNum+"-"+ Thread.currentThread().getId());
+                    contentAppender.appendLine(lineNum+"-"+ Thread.currentThread().getName());
                 });
+
+                 System.out.println(Thread.currentThread().getName()+" has written a line");
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
